@@ -14,6 +14,12 @@ namespace Quic{
                 super.render(defObj,viewContext,container);
                 
             }
+            getViewValue(element:HTMLInputElement){
+                return element.value;
+            }
+            setViewValue(element:HTMLInputElement , value:any){
+                element.value = value;
+            }
             renderElement(renderContext:IRenderContext):void{
                 
             }
@@ -24,8 +30,6 @@ namespace Quic{
                 let input = 
                 renderContext.element = 
                 (renderContext.wrapElement as any).quid_input = renderContext.wrapElement.firstChild.nextSibling as HTMLInputElement;
-                
-
             }
             
         }

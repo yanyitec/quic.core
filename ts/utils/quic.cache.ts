@@ -1,5 +1,6 @@
+///<reference path="quic.promise.ts" />
 namespace Quic{
-    class CacheItem{
+    export class CacheItem{
         constructor(key:string,value:any){
             this.key = key;
             this.value = value;
@@ -29,7 +30,7 @@ namespace Quic{
          * @type {number}
          * @memberof Cache
          */
-        timer:number;
+        timer:any;
         /**
          * 缓存时长，毫秒
          * 
@@ -42,7 +43,7 @@ namespace Quic{
          * @param {number} interval 缓存时长(毫秒)
          * @memberof Cache
          */
-        constructor(interval:number){
+        constructor(interval:number=600000){
             interval = interval;
             this.items=[];
             
@@ -55,7 +56,7 @@ namespace Quic{
          * @returns {Cache} 
          * @memberof Cache
          */
-        setItem(key:string ,value:any):Cache{
+        setItem(key:string ,value:any,expireTime?:number):Cache{
             let items :Array<CacheItem> = this.items;
             for(let i =0,j=items.length;i<j;i++){
                 var item = items.shift();
@@ -68,7 +69,8 @@ namespace Quic{
                         return this;
                     }
                     item.value = value;
-                    item.expireTime = new Date().getTime() + this.interval;
+                    if(expireTime===undefined)item.expireTime = new Date().getTime() + this.interval;
+                    else item.expireTime = expireTime;
                     items.push(item);
                     return this;
                 }else{

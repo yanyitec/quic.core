@@ -2,19 +2,25 @@ namespace Quic{
     export interface IPromisedFunc{
         (resolve:Function,reject:Function):void;
     }
-    class PromiseResult{
+    export interface IFullfill<T>{
+        (result:T,rs1?:any,rs2?:any);
+    }
+    export interface IReject{
+        (error):any;
+    }
+    export class PromiseResult<T>{
         fullfilled:boolean;
-        result:any;
+        result:T;
         result1?:any;
         result2?:any;
         apply_invocation:boolean;
     }
-    export class Promise{
-        __done_handlers:Array<Function>;
-        __fail_handlers:Array<Function>;
-        __result:PromiseResult;
+    export class Promise<T=any>{
+        __done_handlers:Array<IFullfill<T>>;
+        __fail_handlers:Array<IReject>;
+        __result:PromiseResult<T>;
         promiseId:number;
-        constructor(promised?:IPromisedFunc|Promise,constValue?:any){
+        constructor(promised?:IPromisedFunc|Promise<T>,constValue?:any){
             let self = this,asyncCall = false;
             if((this.promiseId = seed++)==2100000000) seed=0;
             if(!promised){
@@ -26,14 +32,13 @@ namespace Quic{
                 resolved.call(self);
                 return;
             }
-            let resolve =function(apply_invocation,arg1,arg2){
-                let isApply = apply_invocation==="quic!apply";
+            let resolve =function(result,apply_invocation,arg2){
                 self.__result = {
                     fullfilled:true,
-                    result:isApply?arg1:apply_invocation,
-                    result1:arg1,
+                    result:result,
+                    result1:apply_invocation,
                     result2:arg2,
-                    apply_invocation:isApply
+                    apply_invocation:apply_invocation==="quic!apply"
                 };
                 if(asyncCall){
                     setTimeout(() => {
@@ -59,7 +64,7 @@ namespace Quic{
                 return;
             }
             if(promised instanceof Promise){
-                (promised as Promise).done(resolve).fail(reject);
+                (promised as Promise<T>).done(resolve).fail(reject);
                 return;
             }
             asyncCall = true;
@@ -77,22 +82,22 @@ namespace Quic{
         }
         resolve:Function;
         reject:Function;
-        done(done_handler:Function):Promise{
+        done(done_handler:IFullfill<T>):Promise<T>{
             (this.__done_handlers|| (this.__done_handlers=[])).push(done_handler);
             return this;
         }
-        fail(fail_handler:Function):Promise{
+        fail(fail_handler:IReject):Promise<T>{
             (this.__fail_handlers|| (this.__fail_handlers=[])).push(fail_handler);
             return this;
         }
 
         
     }
-    function resolved(){
-        let result :PromiseResult = this.__result;
-        this.fail = function(done_handler:Function):Promise{return this;};
+    function resolved<T>(){
+        let result :PromiseResult<T> = this.__result;
+        this.fail = function(done_handler:Function):Promise<T>{return this;};
         if(result.apply_invocation){
-            this.done = function(done_handler:Function):Promise{
+            this.done = function(done_handler:Function):Promise<T>{
                 done_handler.apply(this,result.result);
                 return this;
             };
@@ -104,7 +109,7 @@ namespace Quic{
                 }
             }
         }else {
-            this.done = function(done_handler:Function):Promise{
+            this.done = function(done_handler:Function):Promise<T>{
                 done_handler.call(this,result.result,result.result1,result.result2);
                 return this;
             };
@@ -122,10 +127,10 @@ namespace Quic{
         }
         return this;
     }
-    function rejected(){
-        let result :PromiseResult = this.__result;
-        this.done = function(done_handler:Function):Promise{return this;};
-        this.fail = function(fail_handler:Function):Promise{
+    function rejected<T>(){
+        let result :PromiseResult<T> = this.__result;
+        this.done = function(done_handler:IFullfill<T>):Promise<T>{return this;};
+        this.fail = function(fail_handler:IReject):Promise<T>{
             fail_handler.call(this,result.result);
             return this;
         };
@@ -142,7 +147,7 @@ namespace Quic{
         }
         return this;
     }
-    export function when(...args:Array<IPromisedFunc|Promise|string>):Promise{
+    export function when<T>(...args:Array<IPromisedFunc|Promise<T>|string>):Promise<T>{
         
         return new Promise((resolve,reject)=>{
             let taskcount = 1;
