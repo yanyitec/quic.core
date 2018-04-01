@@ -29,6 +29,7 @@ namespace Quic{
         components?:{[subname:string]:IField};
         attributes:{[attrname:string]:string};
         slot?:string;
+        grid_css:string[];
     }    
 
     export interface IViewOptions{

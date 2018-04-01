@@ -1,4 +1,5 @@
 ///<reference path="quic.instance.ts" />
+/*
 namespace Quic{
     export interface IRenderContext{
         render:IRender,
@@ -12,7 +13,6 @@ namespace Quic{
 
 
     export interface IRender{
-        gridCss:Array<string>;
         render(field:IField,viewContext:QuicInstance,container?:any):any;
         id(renderContext:IRenderContext,value?:any):any;
         value(renderContext:IRenderContext,value?:any):any;
@@ -24,11 +24,10 @@ namespace Quic{
         (context:IRenderContext,viewAccessor:(value?:any)=>void,modelAccessor:IAccessor):void;
     }
     export interface IAttibute{
-        (renderContext:IRenderContext,value?:any):any;
+        (renderContext:IRenderContext,value?:any,old_value?:any):any;
     }
     
     export abstract class Render implements IRender{
-        gridCss:Array<string>;
         render(field:IField,viewContext:QuicInstance,container?:any):any{
             regulateField(field,viewContext);
             
@@ -92,29 +91,13 @@ namespace Quic{
     export let renders :{[type:string]:any}={};
     let binders :{[index:string]:IBinder} = (Render as any).binders={};
 
-    export let createElement:(context:IRenderContext,type?:string)=>any;
-    export let appendElement:(context:IRenderContext,parentElement:any,element:any)=>any;
-    export declare function mask(element:any,message?:string,icon?:string);
-    export declare function unmask(element:any);
-    export declare function messageBox(message:string,type?:string):Promise<string>;
+    
+    //export declare function mask(element:any,message?:string,icon?:string);
+    //export declare function unmask(element:any);
+    
 
-    let idseed = 0;
-    export function newViewId(){
-        if(idseed++ ==2100000000)idseed = 0;
-        return idseed;
-    }
-
-    function regulateField(field:IField,viewContext:QuicInstance):IField {
-        if((field as any).regulated ) return field;
-        if(field.extend){
-            let superField = viewContext.opts.fields[field.extend];
-            if(superField){
-                combine(field,superField);
-            }
-        }
-        if(!field.data_path) field.data_path=field.name;
-        return field;
-    }
+    
 
     
 }
+*/

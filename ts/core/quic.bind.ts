@@ -1,7 +1,7 @@
 namespace Quic{
     
     export interface IBInd{
-        renderContext:IRenderContext;
+        view:IView;
         viewAccessor:(value?:any)=>void;
     }
     export class BindInfo{
@@ -24,13 +24,17 @@ namespace Quic{
         modelchange(value:any,old_value:any){
             for(let i =0,j=this.binds.length;i<j;i++){
                 let bind = this.binds[i];
-                bind.viewAccessor.call(bind.renderContext.render,bind.renderContext,value,old_value);
+                bind.viewAccessor.call(bind.view,value);
+            }
+            for(let sub in this.members){
+                let subinfo = this.members[sub];
+                subinfo.modelchange(value?value[sub]:undefined,old_value?old_value[sub]:undefined);
             }
         }
-        static bind(context:IRenderContext,viewAccessor:(value?:any)=>void,modelAccessor:IAccessor){
+        static bind(view:IView,viewAccessor:(value?:any)=>void,modelAccessor:IAccessor){
             let paths:string[] = modelAccessor.paths;
             if(!paths)return;
-            let info = context.viewContext.bindInfo;
+            let info = view.$instance.$bindInfo;
             for(let i =0,j=paths.length-1;i<=j;i++){
                 let propname = paths[i];
                 if(propname==="$self"){continue;}
@@ -47,7 +51,7 @@ namespace Quic{
                     }
                 }
                 curr.binds.push({
-                    renderContext:context,
+                    view:view,
                     viewAccessor:viewAccessor
                 });
                 info = curr;
@@ -68,10 +72,13 @@ namespace Quic{
         if(!info) return;
         let currValue = curr[propname];
         let originValue = origin[propname];
-        //一样，不用触发任何联动
-        //引用类型不可能一样，因为在update之前会clone一次origin
-        if(currValue===originValue)  return;
         let curr_t = typeof currValue;
+        //一样，不用触发任何联动
+        
+        if(currValue===originValue){
+            if(curr_t!=="object") return;
+        }
+        
         let origin_t = typeof origin;
         if(curr_t!==origin_t){
             info.modelchange(currValue,originValue);

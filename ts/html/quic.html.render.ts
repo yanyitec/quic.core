@@ -4,7 +4,7 @@ namespace Quic{
     export namespace Html{
         
         export abstract class HtmlRender extends Render{
-            css:string;
+            
             constructor(){
                 super();
             }
@@ -23,12 +23,13 @@ namespace Quic{
             }
             
             protected renderElement(context:IRenderContext){
-                let css = this.css || "";
-                if(this.gridCss){
+                let css =  "";
+                let gridCss = context.field.grid_css;
+                if(gridCss){
                     if(css) {
-                        css = this.gridCss.join(" ") + " " + css;
+                        css = gridCss.join(" ") + " " + css;
                     }else {
-                        css = this.gridCss.join(" ");
+                        css = gridCss.join(" ");
                     }
                 }
                 (context as any).quic_constCss = css;
