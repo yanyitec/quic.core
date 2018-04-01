@@ -21,7 +21,7 @@ namespace Quic{
         _T(text:string):string;
     }
     export interface IBinder{
-        (context:IRenderContext,attribute:(value?:any)=>void):void;
+        (context:IRenderContext,viewAccessor:(value?:any)=>void,modelAccessor:IAccessor):void;
     }
     export interface IAttibute{
         (renderContext:IRenderContext,value?:any):any;
@@ -29,7 +29,6 @@ namespace Quic{
     
     export abstract class Render implements IRender{
         gridCss:Array<string>;
-        binders:{[index:string]:IBinder};
         render(field:IField,viewContext:QuicInstance,container?:any):any{
             regulateField(field,viewContext);
             
@@ -52,30 +51,33 @@ namespace Quic{
             }
             if(container) appendElement(renderContext,container,element);
             this.renderElement(renderContext);
-            for(let attrname in field){
-                let elementAttribute = (this as any)[attrname];
-                if(!elementAttribute) continue;
-                let binder : IBinder = this.binders?this.binders[attrname]:null;
-                if(!binder) binder = binders[attrname];
-                if(binder){
-                    binder(renderContext,elementAttribute);
-                }
-            }
-            (element as any).quic_renderContext = renderContext;
+            
             return element;
         }
         abstract id(renderContext:IRenderContext,value?:any):any;
         abstract value(renderContext:IRenderContext,value?:any):any;
         
-        protected abstract renderElement(renderContext:IRenderContext);
-        
-        
-            
+        protected renderElement(renderContext:IRenderContext){
+            let field = renderContext.field;
+            let element = renderContext.element;
+            for(let attrname in field){
+                let attrvalue = field[attrname];
+                let viewAccessor = (this as any)[attrname];                
+                let modelAccessor = accessorManager.acquire(attrvalue,null);
+                if(viewAccessor){
+                    if(modelAccessor) {
+                        BindInfo.bind(renderContext,viewAccessor,modelAccessor);
+                    }else{
+                        viewAccessor(attrvalue);
+                    }
+                }
+            }
+            (element as any).quic_renderContext = renderContext;
+        }
+      
         _T(text:string):string{
             return text;
         }
-
-       
 
         format(modelValue:string,context:IRenderContext):string{
             return modelValue;
@@ -85,11 +87,13 @@ namespace Quic{
         }
     }
 
+    
+
     export let renders :{[type:string]:any}={};
     let binders :{[index:string]:IBinder} = (Render as any).binders={};
 
-    export declare function createElement(context:IRenderContext,type?:string):any;
-    export declare function appendElement(context:IRenderContext,parentElement:any,element:any):any;
+    export let createElement:(context:IRenderContext,type?:string)=>any;
+    export let appendElement:(context:IRenderContext,parentElement:any,element:any)=>any;
     export declare function mask(element:any,message?:string,icon?:string);
     export declare function unmask(element:any);
     export declare function messageBox(message:string,type?:string):Promise<string>;

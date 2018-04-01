@@ -14,6 +14,7 @@ namespace Quic{
         viewName:string;
         viewType:string;
         layout:{[subname:string]:Quic.IField};
+        bindInfo:BindInfo;
         
     
         constructor(opts:IQuicOptions & IQuicDesignedOptions,context?:any){
@@ -23,6 +24,7 @@ namespace Quic{
             mask(this.element);
             
             this.module = opts.module;
+            
             if(opts.module){
                 Quic.aquireOpts(opts.module).done((dftOpts)=>{
                     init(this,context,opts,dftOpts);
@@ -69,6 +71,7 @@ namespace Quic{
             if(opts.imports){
                 combine(model,opts.imports,undefined,instance.context_data);
             }
+            instance.bindInfo = new BindInfo("$self",accessorManager.acquire("$self"));
             return new Promise(null,model);
         }
         return new Promise((resolve,reject:IFullfill<any>)=>{

@@ -16,25 +16,20 @@ var Quic;
         var HtmlGroupRender = /** @class */ (function (_super) {
             __extends(HtmlGroupRender, _super);
             function HtmlGroupRender() {
-                var _this = _super.call(this) || this;
-                _this.tagName = "div";
-                _this.binds = {
-                    "group-caption": true
-                };
-                return _this;
+                return _super.call(this) || this;
             }
             HtmlGroupRender.prototype.renderElement = function (renderContext) {
                 var wrapElement = renderContext.wrapElement;
                 wrapElement.innerHTML = "<div class=\"group-header\"><h3 class=\"group-caption\"></h3><div class=\"group-actions\"></div></div><div class=\"group-content\"></div><div class=\"group-footer\"><div class=\"group-status\"></div><div class=\"group-actions\"></div></div>";
-                var childrenDef = renderContext.defObject.layout || renderContext.defObject.children;
+                var childrenDef = renderContext.field.components;
                 for (var i in childrenDef) {
                     var childDef = childrenDef[i];
                     if (!childDef)
                         continue;
                     var childViewType = renders[childDef.viewType];
                     var childView = new childViewType();
-                    var rawChild = childView.render(childDef, renderContext.defObject, renderContext.element);
-                    var slot = renderContext.defObject.slot;
+                    var rawChild = childView.render(childDef, renderContext.viewContext, renderContext.element);
+                    var slot = renderContext.field.slot;
                     var ctn = void 0;
                     switch (slot) {
                         case "header":
@@ -48,17 +43,17 @@ var Quic;
                     ctn.appendChild(rawChild);
                 }
             };
+            HtmlGroupRender.prototype.caption = function (context, value) {
+                var captionElem = context.wrapElement.firstChild.firstChild;
+                captionElem.innerHTML = Quic.getValue(context.expr, context.data);
+            };
+            HtmlGroupRender.prototype.status = function (context, value) {
+                var statusElem = context.wrapElement.lastChild.firstChild;
+                statusElem.innerHTML = Quic.getValue(context.expr, context.data);
+            };
             return HtmlGroupRender;
         }(Html.HtmlCompositeRender));
         Html.HtmlGroupRender = HtmlGroupRender;
-        renders["composite"] = new Html.HtmlCompositeRender();
-        Quic.binders["group-caption"] = function (context, bindParameter) {
-            var captionElem = context.wrapElement.firstChild.firstChild;
-            captionElem.innerHTML = Quic.getValue(context.expr, context.data);
-        };
-        Quic.binders["group-status"] = function (context, bindParameter) {
-            var statusElem = context.wrapElement.lastChild.firstChild;
-            statusElem.innerHTML = Quic.getValue(context.expr, context.data);
-        };
+        renders["group"] = new HtmlGroupRender();
     })(Html = Quic.Html || (Quic.Html = {}));
 })(Quic || (Quic = {}));

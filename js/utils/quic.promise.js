@@ -20,14 +20,13 @@ var Quic;
                 resolved.call(self);
                 return;
             }
-            var resolve = function (apply_invocation, arg1, arg2) {
-                var isApply = apply_invocation === "quic!apply";
+            var resolve = function (result, apply_invocation, arg2) {
                 self.__result = {
                     fullfilled: true,
-                    result: isApply ? arg1 : apply_invocation,
-                    result1: arg1,
+                    result: result,
+                    result1: apply_invocation,
                     result2: arg2,
-                    apply_invocation: isApply
+                    apply_invocation: apply_invocation === "quic!apply"
                 };
                 if (asyncCall) {
                     setTimeout(function () {

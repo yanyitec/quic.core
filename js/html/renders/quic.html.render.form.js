@@ -16,46 +16,50 @@ var Quic;
         var HtmlFormRender = /** @class */ (function (_super) {
             __extends(HtmlFormRender, _super);
             function HtmlFormRender() {
-                var _this = _super.call(this) || this;
-                _this.tagName = "form";
-                return _this;
+                return _super.call(this) || this;
             }
-            HtmlFormRender.prototype.render = function (defObj, viewContext, container) {
-                var form = _super.prototype.render.call(this, defObj, viewContext, container);
-                form.method = defObj.method || "get";
-                form.action = defObj.url || "";
+            HtmlFormRender.prototype.renderElement = function (context) {
+                var form = context.element;
+                form.method = context.field.method || "get";
+                form.action = context.field.url || "";
+                _super.prototype.renderElement.call(this, context);
             };
-            HtmlFormRender.prototype.getViewValue = function (element) {
-                var els = element.elements;
-                var result = {};
-                for (var i = 0, j = els.length; i < j; i++) {
-                    var input = els[i];
-                    var renderContext = input.quic_renderContext;
-                    if (renderContext) {
-                        result[input.name] = renderContext.unformat(renderContext.getViewValue(input));
-                    }
-                    else {
-                        result[input.name] = input.value;
-                    }
-                }
-            };
-            HtmlFormRender.prototype.setViewValue = function (element, data) {
-                var els = element.elements;
-                var result = {};
-                for (var i = 0, j = els.length; i < j; i++) {
-                    var input = els[i];
-                    var renderContext = input.quic_renderContext;
-                    if (renderContext) {
-                        renderContext.setViewValue(renderContext.format(data[input.name]));
-                    }
-                    else {
-                        input.value = data[input.name];
-                    }
-                }
+            HtmlFormRender.prototype.value = function (context, value) {
+                if (value === undefined)
+                    return getViewValue(context.element);
+                setViewValue(context.element, value);
             };
             return HtmlFormRender;
         }(Html.HtmlCompositeRender));
         Html.HtmlFormRender = HtmlFormRender;
+        function getViewValue(element) {
+            var els = element.elements;
+            var result = {};
+            for (var i = 0, j = els.length; i < j; i++) {
+                var input = els[i];
+                var renderContext = input.quic_renderContext;
+                if (renderContext) {
+                    result[input.name] = renderContext.unformat(renderContext.getViewValue(input));
+                }
+                else {
+                    result[input.name] = input.value;
+                }
+            }
+        }
+        function setViewValue(element, data) {
+            var els = element.elements;
+            var result = {};
+            for (var i = 0, j = els.length; i < j; i++) {
+                var input = els[i];
+                var renderContext = input.quic_renderContext;
+                if (renderContext) {
+                    renderContext.setViewValue(renderContext.format(data[input.name]));
+                }
+                else {
+                    input.value = data[input.name];
+                }
+            }
+        }
         renders["form"] = new HtmlFormRender();
     })(Html = Quic.Html || (Quic.Html = {}));
 })(Quic || (Quic = {}));

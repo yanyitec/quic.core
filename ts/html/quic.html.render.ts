@@ -39,10 +39,5 @@ namespace Quic{
         
         
     }
-    export function createElement(context:IRenderContext,type?:string):any{
-        return document.createElement(type||"div");
-    }
-    export function appendElement(context:IRenderContext,parentElement:any,element:any):void{
-        parentElement.appendChild(element);
-    }
+    
 }

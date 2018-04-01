@@ -7,6 +7,7 @@ declare namespace Quic {
         data?: any;
         dataType?: string;
         sync?: boolean;
+        cache?: boolean;
         headers?: {
             [index: string]: string;
         };

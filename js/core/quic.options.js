@@ -1,4 +1,5 @@
 ///<reference path="../utils/quic.cache.ts" />
+///<reference path="../utils/quic.combine.ts" />
 var Quic;
 (function (Quic) {
     var cache = new Quic.Cache();

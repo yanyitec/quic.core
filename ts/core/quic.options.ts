@@ -27,7 +27,8 @@ namespace Quic{
         validations?:{[validatorName:string]:any};
         data_path?:string;
         components?:{[subname:string]:IField};
-        attributes:{[attrname:string]:string}
+        attributes:{[attrname:string]:string};
+        slot?:string;
     }    
 
     export interface IViewOptions{

@@ -1,4 +1,5 @@
 /// <reference path="../utils/quic.cache.d.ts" />
+/// <reference path="../utils/quic.combine.d.ts" />
 declare namespace Quic {
     /**
      * 代表数据字段
@@ -8,7 +9,9 @@ declare namespace Quic {
      */
     interface IField {
         name: string;
+        extend?: string;
         label?: string;
+        viewId?: string;
         /**
          * 控件类型 系统内建一下类型
          * 文本:text,editor,textarea
@@ -18,15 +21,36 @@ declare namespace Quic {
          * @type {string}
          * @memberof IControl
          */
-        controlType?: string;
+        viewType?: string;
         dataType?: string;
         length?: number;
         validations?: {
             [validatorName: string]: any;
         };
         data_path?: string;
-        components: {
+        components?: {
             [subname: string]: IField;
+        };
+        attributes: {
+            [attrname: string]: string;
+        };
+        slot?: string;
+    }
+    interface IViewOptions {
+        viewType?: string;
+        components?: {
+            [subname: string]: IField;
+        };
+    }
+    interface IQuicDesignedOptions {
+        module: string;
+        viewType: string;
+        viewName: string;
+        fields: {
+            [subname: string]: IField;
+        };
+        layouts: {
+            [viewName: string]: IViewOptions;
         };
     }
     interface IQuicOptions {
@@ -50,7 +74,7 @@ declare namespace Quic {
          * @type {{[subname:string]:IField}}
          * @memberof IQuicOptions
          */
-        layout?: {
+        components?: {
             [subname: string]: IField;
         };
         /**
@@ -62,5 +86,5 @@ declare namespace Quic {
         controller?: any;
         model?: any;
     }
-    function aquireOpts(name: string): Promise;
+    function aquireOpts(name: string): Promise<IQuicDesignedOptions>;
 }

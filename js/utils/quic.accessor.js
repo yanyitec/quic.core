@@ -4,10 +4,30 @@ var Quic;
         function AccessorManager() {
             this.__accessors = {};
         }
-        AccessorManager.prototype.acquire = function (expr) {
+        AccessorManager.prototype.acquire = function (expr, braced) {
+            if (expr[0] === "$" && expr[1] === "{" && expr[expr.length - 1] === "}") {
+                var getCode = "with ($_DATA){ return " + expr.substring(2, expr.length - 1) + ";}";
+                var setter = function (data, value) { throw new Error('计算表达式是只读的'); };
+                var directData_1 = function (data) { throw new Error('计算表达式没有直接对象'); };
+                return {
+                    getValue: new Function("$DATA", getCode),
+                    setValue: setter,
+                    directData: directData_1,
+                    computed: true
+                };
+            }
             var accessor = this.__accessors[expr];
-            if (!accessor)
-                accessor = this.__accessors[expr] = makeAccessor(expr);
+            if (!accessor) {
+                var expression = expr;
+                if (expr[0] == "{" && expr[expr.length - 1] == "}") {
+                    expr = expr.substring(1, expr.length - 1);
+                }
+                else {
+                    if (braced)
+                        return null;
+                }
+                accessor = this.__accessors[expression] = makeAccessor(expr);
+            }
             return accessor;
         };
         return AccessorManager;
@@ -23,7 +43,7 @@ var Quic;
             directDataCode = "return data;";
             setCode = "throw new Error('$self是只读的');";
         }
-        else if (expr === "$" && expr[1] === "{" && expr[expr.length - 1] === "}") {
+        else if (expr[0] === "$" && expr[1] === "{" && expr[expr.length - 1] === "}") {
             getCode = "with (data){ return " + expr.substring(2, expr.length - 1) + ";}";
             setCode = "throw new Error('计算表达式是只读的');";
             directDataCode = "throw new Error('计算表达式没有直接对象');";

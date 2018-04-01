@@ -16,15 +16,10 @@ var Quic;
         var HtmlTextRender = /** @class */ (function (_super) {
             __extends(HtmlTextRender, _super);
             function HtmlTextRender() {
-                var _this = _super.call(this) || this;
-                _this.tagName = "input";
-                return _this;
+                return _super.call(this) || this;
             }
             HtmlTextRender.prototype.render = function (defObj, viewContext, container) {
                 var isInForm = viewContext.viewType === "form";
-                if (isInForm) {
-                    this.tagName = "div";
-                }
                 _super.prototype.render.call(this, defObj, viewContext, container);
             };
             HtmlTextRender.prototype.getViewValue = function (element) {
@@ -36,8 +31,8 @@ var Quic;
             HtmlTextRender.prototype.renderElement = function (renderContext) {
             };
             HtmlTextRender.prototype.renderInform = function (renderContext) {
-                var label = this._T(renderContext.defObject.label);
-                var name = renderContext.defObject.name;
+                var label = this._T(renderContext.field.label || renderContext.field.name);
+                var name = renderContext.field.name;
                 renderContext.wrapElement.innerHTML = "<label class=\"field-label>\">" + label + "</label><input type=\"text\" class=\"field-input\" name=\"" + name + "\" ><label class=\"field-ins\"></label>";
                 var input = renderContext.element =
                     renderContext.wrapElement.quid_input = renderContext.wrapElement.firstChild.nextSibling;

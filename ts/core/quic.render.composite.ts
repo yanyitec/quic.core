@@ -20,5 +20,5 @@ namespace Quic{
             }
         }
         
-        renders["composite"] = new CompositeRender();
+        //renders["composite"] = new CompositeRender();
 }

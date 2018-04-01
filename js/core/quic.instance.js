@@ -1,52 +1,40 @@
+///<reference path="../utils/quic.observable.ts" />
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Quic;
 (function (Quic) {
-    var QuicInstance = /** @class */ (function () {
+    var QuicInstance = /** @class */ (function (_super) {
+        __extends(QuicInstance, _super);
         function QuicInstance(opts, context) {
-            var _this = this;
+            var _this = _super.call(this) || this;
             //创建元素
-            this.element = opts.element || Quic.createElement();
-            //let ui = (Quic as any).ui;
-            //ui.mask(this.element,"loading","loading");
-            if (typeof opts === "string")
-                opts = { module: opts };
-            this.module = opts.module;
+            _this.element = opts.element || Quic.createElement();
+            Quic.mask(_this.element);
+            _this.module = opts.module;
             if (opts.module) {
                 Quic.aquireOpts(opts.module).done(function (dftOpts) {
-                    _this.__init(context, opts, dftOpts);
+                    init(_this, context, opts, dftOpts);
                 });
             }
             else {
-                this.__init(context, opts);
+                init(_this, context, opts);
             }
+            return _this;
         } //end constructor
-        QuicInstance.prototype.__init = function (context, opts, dftOpts) {
-            this.viewName = opts.viewName || "query";
-            this.viewType = opts.viewType || "query";
-            //上下文
-            var contextData;
-            if (context instanceof QuicInstance) {
-                this.superInstance = context;
-                contextData = this.superInstance.model;
-            }
-            else {
-                contextData = context || {};
-            }
-            if (opts.controller) {
-                if (typeof opts.controller === "function") {
-                    this.controller = new opts.controller(this);
-                }
-                else {
-                    this.controller = opts.controller || {};
-                }
-            }
-            if (opts.imports) {
-            }
-            //this.__init =()=>throw new Error("already inited.");
-        };
         return QuicInstance;
-    }());
+    }(Quic.Observable));
     Quic.QuicInstance = QuicInstance;
     function init(instance, context, opts, dftOpts) {
+        initController(instance, opts);
+        Quic.combine(opts, dftOpts);
         instance.viewName = opts.viewName || "query";
         instance.viewType = opts.viewType || "query";
         //上下文
@@ -58,67 +46,64 @@ var Quic;
         else {
             contextData = context || {};
         }
+        instance.context_data = contextData;
+        initModel(instance, opts).done(function (model) {
+            instance.model = model;
+            instance.notify("model", model, instance);
+            initView(instance, opts);
+            Quic.unmask(instance.element);
+        });
+    }
+    function initModel(instance, opts) {
+        if (!opts.url) {
+            var model = opts.model || {};
+            instance.notify("data", model, instance);
+            if (opts.imports) {
+                Quic.combine(model, opts.imports, undefined, instance.context_data);
+            }
+            return new Quic.Promise(null, model);
+        }
+        return new Quic.Promise(function (resolve, reject) {
+            Quic.transport({
+                url: opts.url,
+                method: "get",
+                dataType: "json",
+                cache: false
+            }).done(function (model) {
+                instance.notify("data", model, instance);
+                if (opts.imports)
+                    Quic.combine(model, opts.imports, undefined, instance.context_data);
+                resolve(model);
+            }).fail(reject);
+        });
+    }
+    function initController(instance, opts) {
         if (opts.controller) {
             if (typeof opts.controller === "function") {
-                instance.controller = new opts.controller(this);
+                instance.controller = new opts.controller(instance);
             }
             else {
                 instance.controller = opts.controller || {};
             }
+            if (instance.controller.init)
+                instance.controller.init(instance);
         }
-        //导入初始化数据
-        if (opts.imports) {
-            doImports(this.model, opts.imports, contextData);
-        }
-        //this.__init =()=>throw new Error("already inited.");
     }
-    function combineOpts(opts, dftOpts, propname) {
-        if (propname === undefined) {
-            for (var n in dftOpts) {
-                combineOpts(opts, dftOpts, n);
-            }
-            return opts;
-        }
-        var targetValue = opts[propname];
-    }
-    function loadData(instance, opts) {
-    }
-    function doImports(target, defValue, contextData, propname) {
-        if (propname === undefined) {
-            for (var n in defValue) {
-                doImports(target, defValue[n], contextData, n);
-            }
-            return target;
-        }
-        var t = typeof (defValue);
-        var result;
-        if (t === "string") {
-            if (defValue[0] == "{" && defValue[defValue.length - 1] == "}") {
-                var expr = defValue.substring(1, defValue.length - 1);
-                result = target[propname] = Quic.getValue(expr, contextData);
-            }
-            else if (defValue[0] == "$" && defValue[1] == "{" && defValue[defValue.length - 1] == "}") {
-                var expr = defValue.substring(1);
-                result = target[propname] = Quic.getValue(expr, contextData);
-            }
-            else {
-                result = target[propname] = defValue;
-            }
-            return result;
-        }
-        if (t === "object") {
-            var targetValue = target[propname];
-            if (!targetValue) {
-                targetValue = defValue.push && defValue.length !== undefined ? [] : {};
-                target[propname] = target;
-            }
-            for (var subname in defValue) {
-                doImports(targetValue, defValue[subname], contextData, subname);
-            }
-            return targetValue;
+    function initView(instance, opts) {
+        var view, viewType;
+        if (opts.components) {
+            view = {
+                components: opts.components,
+                viewType: instance.viewType
+            };
         }
         else {
-            return target[propname] = defValue;
+            view = opts.layouts[instance.viewName];
+            viewType = instance.viewType || opts.viewType;
         }
+        var render = Quic.renders[viewType];
+        instance.notify("rendering", view, instance);
+        render.render(view, instance, instance.element);
+        instance.notify("rendered", view, instance);
     }
 })(Quic || (Quic = {}));

@@ -8,7 +8,7 @@ declare namespace Quic {
     class AccessorManager {
         private __accessors;
         constructor();
-        acquire(expr: any): IAccessor;
+        acquire(expr: string, braced?: boolean): IAccessor;
     }
     function accessor(expr: any): IAccessor;
     function getValue(expr: any, data: any): any;

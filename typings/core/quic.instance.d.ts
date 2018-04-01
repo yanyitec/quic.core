@@ -1,9 +1,10 @@
+/// <reference path="../utils/quic.observable.d.ts" />
 declare namespace Quic {
-    class QuicInstance {
+    class QuicInstance extends Observable {
         element: any;
         module: string;
-        context: any;
-        opts: Quic.IQuicOptions;
+        context_data: any;
+        opts: IQuicOptions & IQuicDesignedOptions;
         superInstance: QuicInstance;
         controller: object;
         model: any;
@@ -12,7 +13,6 @@ declare namespace Quic {
         layout: {
             [subname: string]: Quic.IField;
         };
-        constructor(opts: Quic.IQuicOptions | string, context?: any);
-        __init(context: any, opts: Quic.IQuicOptions, dftOpts?: Quic.IQuicOptions): void;
+        constructor(opts: IQuicOptions & IQuicDesignedOptions, context?: any);
     }
 }

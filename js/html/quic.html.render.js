@@ -1,32 +1,39 @@
+///<reference path="../core/quic.render.ts" />
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Quic;
 (function (Quic) {
     var Html;
     (function (Html) {
-        var HtmlRender = /** @class */ (function () {
+        var HtmlRender = /** @class */ (function (_super) {
+            __extends(HtmlRender, _super);
             function HtmlRender() {
-                //this.binds = ["disable"];
+                return _super.call(this) || this;
             }
-            HtmlRender.prototype.render = function (defObj, viewContext, container) {
-                var element = document.createElement(this.tagName);
-                var renderContext = {
-                    render: this,
-                    defObject: defObj,
-                    viewContext: viewContext,
-                    element: element,
-                    wrapElement: element
-                };
-                if (defObj.attributes) {
-                    for (var n in defObj.attributes)
-                        element.setAttribute(n, defObj.attributes[n]);
-                }
-                if (!(element.id = defObj.viewId)) {
-                    if (container) {
-                        element.id = container.id + "_" + (defObj.id || Quic.newViewId());
-                    }
-                    else {
-                        element.id = (defObj.id || Quic.newViewId());
-                    }
-                }
+            HtmlRender.prototype.id = function (context, value) {
+                if (value === undefined)
+                    return context.element.id;
+                context.element.id = value;
+            };
+            HtmlRender.prototype.value = function (context, value) {
+                if (value === undefined)
+                    return context.element.value;
+                context.element.value = value;
+            };
+            HtmlRender.prototype.hidden = function (context, value) {
+                if (value === undefined)
+                    return context.element.value;
+                context.element.value = value;
+            };
+            HtmlRender.prototype.renderElement = function (context) {
                 var css = this.css || "";
                 if (this.gridCss) {
                     if (css) {
@@ -36,56 +43,10 @@ var Quic;
                         css = this.gridCss.join(" ");
                     }
                 }
-                element.quic_constCss = css;
-                if (container)
-                    container.appendChild(element);
-                this.renderElement(renderContext);
-                for (var i in this.binds) {
-                    var bindname = this.binds[i];
-                    var binder = Quic.binders[bindname];
-                    if (binder) {
-                        var bindParameter = defObj[bindname];
-                        if (bindParameter !== undefined)
-                            binder(renderContext, bindParameter);
-                    }
-                }
-                element.quic_renderContext = renderContext;
-                return element;
-            };
-            HtmlRender.prototype.format = function (modelValue) {
-                return modelValue;
-            };
-            HtmlRender.prototype.unformat = function (viewValue) {
-                return viewValue;
-            };
-            HtmlRender.prototype.getViewValue = function (element) {
-                throw new Error("Exception");
-            };
-            HtmlRender.prototype.setViewValue = function (element, value) {
-                throw new Error("Exception");
-            };
-            HtmlRender.prototype._T = function (text) {
-                return text;
+                context.quic_constCss = css;
             };
             return HtmlRender;
-        }());
+        }(Quic.Render));
         Html.HtmlRender = HtmlRender;
-        function attach(element, evt, listener) {
-            if (element.addEventListener) {
-                Quic.attach = function (element, evt, listener) {
-                    element.addEventListener(evt, listener, false);
-                };
-            }
-            else if (element.attachEvent) {
-                Quic.attach = function (element, evt, listener) {
-                    element.attachEvent("on" + evt, listener, false);
-                };
-            }
-            else {
-                throw new Error("Browser is not support the addEventListener/attachEvent");
-            }
-            Quic.attach(element, evt, listener);
-        }
-        Html.attach = attach;
     })(Html = Quic.Html || (Quic.Html = {}));
 })(Quic || (Quic = {}));

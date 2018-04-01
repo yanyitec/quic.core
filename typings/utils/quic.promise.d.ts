@@ -2,23 +2,29 @@ declare namespace Quic {
     interface IPromisedFunc {
         (resolve: Function, reject: Function): void;
     }
-    class PromiseResult {
+    interface IFullfill<T> {
+        (result: T, rs1?: any, rs2?: any): any;
+    }
+    interface IReject {
+        (error: any): any;
+    }
+    class PromiseResult<T> {
         fullfilled: boolean;
-        result: any;
+        result: T;
         result1?: any;
         result2?: any;
         apply_invocation: boolean;
     }
-    class Promise {
-        __done_handlers: Array<Function>;
-        __fail_handlers: Array<Function>;
-        __result: PromiseResult;
+    class Promise<T = any> {
+        __done_handlers: Array<IFullfill<T>>;
+        __fail_handlers: Array<IReject>;
+        __result: PromiseResult<T>;
         promiseId: number;
-        constructor(promised?: IPromisedFunc | Promise, constValue?: any);
+        constructor(promised?: IPromisedFunc | Promise<T>, constValue?: any);
         resolve: Function;
         reject: Function;
-        done(done_handler: Function): Promise;
-        fail(fail_handler: Function): Promise;
+        done(done_handler: IFullfill<T>): Promise<T>;
+        fail(fail_handler: IReject): Promise<T>;
     }
-    function when(...args: Array<IPromisedFunc | Promise | string>): Promise;
+    function when<T>(...args: Array<IPromisedFunc | Promise<T> | string>): Promise<T>;
 }
